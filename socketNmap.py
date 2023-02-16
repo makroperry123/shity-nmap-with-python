@@ -16,6 +16,7 @@ import sys
 from colorama import init, Fore
 from termcolor import colored
 from concurrent.futures import ThreadPoolExecutor
+import pyfiglet
 
 def ipformat(target):
     match = re.match(r"[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}",target)
@@ -52,6 +53,7 @@ def portscan(host,ports):
     init()
     
     GREEN = Fore.GREEN
+    RED = Fore.RED
     RESET = Fore.RESET
     
     print("scanning for open ports ...")
@@ -63,10 +65,17 @@ def portscan(host,ports):
             
             if is_open:
                 print(f"{GREEN}[+]{host} : port {port} open {RESET}")
+            else:
+                print(f"{RED}[-]: port {port} is close {RESET}")
  
     
     
 def main():
+    
+    ascii_banner = pyfiglet.figlet_format("PORT SCANNER YAPTIM")
+    ascii_banner2 = pyfiglet.figlet_format("LANNNN")
+    print(ascii_banner+"\n")
+    print(ascii_banner2)
     print("please enter an ip address: (enter q to quit)")
     targetIp = input()
     
