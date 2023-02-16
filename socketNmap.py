@@ -15,11 +15,7 @@ import re
 import sys
 from colorama import init, Fore
 from termcolor import colored
-#192.168.56.1 host ip address
-class AnneniSikimHatası(Exception):
-    "anneni siktim öldü"
-    pass
-
+from concurrent.futures import ThreadPoolExecutor
 
 def ipformat(target):
     match = re.match(r"[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}",target)
@@ -43,13 +39,30 @@ def portformat(portrange):
     
 def IsPortOpen(target,port):
     with socket.socket(socket.AF_INET,socket.SOCK_STREAM) as s:
-        socket.setdefaulttimeout(0.1)
+        socket.setdefaulttimeout(3)
         try:
             s.connect((target,port))
         except:
             return False
         else:
             return True
+        
+def portscan(host,ports):
+    
+    init()
+    
+    GREEN = Fore.GREEN
+    RESET = Fore.RESET
+    
+    print("scanning for open ports ...")
+    with ThreadPoolExecutor(len(ports)) as executor:
+        
+        results = executor.map(IsPortOpen,[host]*len(ports),ports)
+        
+        for port,is_open in zip(ports,results):
+            
+            if is_open:
+                print(f"{GREEN}[+]{host} : port {port} open {RESET}")
  
     
     
@@ -60,11 +73,6 @@ def main():
     if targetIp=="q":
         sys.exit(0)
     
-    init()
-    
-    RED = Fore.RED
-    RESET = Fore.RESET
-    
     #host = "151.101.1.69"
     ipformat(targetIp)    
     print("please enter range of port number: [minimum port range]-[maximum port range]")
@@ -72,24 +80,12 @@ def main():
     
     
     minimumPort,maximumPort=portformat(portrange)
+    ports =[i for i in range(int(minimumPort),int(maximumPort)+1)]
+    
+    portscan(targetIp, ports)
+    
 
-    
-    for i in range(int(minimumPort),int(maximumPort)+1):
-        if  IsPortOpen(targetIp, i):
-            print(f"{RED}[+] {targetIp}: {i} is open {RESET}")
-    
-        
 
 
 while(1):
     main()
-
-#%%
-a=socket.gethostbyname("www.stackoverflow.com")
-print(a)
-a = input()
-with socket.socket(socket.AF_INET,socket.SOCK_STREAM)  as s:
-    for i in range(1,120):
-        result =s.connect_ex((a,i))
-        if result ==0:
-            print(f"port {i} is open")
